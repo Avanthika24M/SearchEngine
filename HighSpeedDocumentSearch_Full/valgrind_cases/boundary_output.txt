@@ -1,0 +1,71 @@
+
+=== HIGH-SPEED DOCUMENT SEARCH ===
+1 Add file   2 Search     3 Update ID   4 Delete ID
+5 List       6 Statistics 7 Save        8 Query history
+0 Exit
+Choice:
+File path:
+Add failed: check that the file exists, is readable, is <=8 MiB, and has a supported extension.
+
+=== HIGH-SPEED DOCUMENT SEARCH ===
+1 Add file   2 Search     3 Update ID   4 Delete ID
+5 List       6 Statistics 7 Save        8 Query history
+0 Exit
+Choice:
+File path:
+Add failed: check that the file exists, is readable, is <=8 MiB, and has a supported extension.
+
+=== HIGH-SPEED DOCUMENT SEARCH ===
+1 Add file   2 Search     3 Update ID   4 Delete ID
+5 List       6 Statistics 7 Save        8 Query history
+0 Exit
+Choice:
+File path:
+Indexed ID: 2
+
+=== HIGH-SPEED DOCUMENT SEARCH ===
+1 Add file   2 Search     3 Update ID   4 Delete ID
+5 List       6 Statistics 7 Save        8 Query history
+0 Exit
+Choice:
+File path:
+Indexed ID: 3
+
+=== HIGH-SPEED DOCUMENT SEARCH ===
+1 Add file   2 Search     3 Update ID   4 Delete ID
+5 List       6 Statistics 7 Save        8 Query history
+0 Exit
+Choice:
+File path:
+Indexed ID: 4
+
+=== HIGH-SPEED DOCUMENT SEARCH ===
+1 Add file   2 Search     3 Update ID   4 Delete ID
+5 List       6 Statistics 7 Save        8 Query history
+0 Exit
+Choice:
+Search keywords:
+2 results
+1. [ID 4] 0.37771 | valgrind_cases/large_7mb.txt | 7560000 bytes
+2. [ID 1] 0.11622 | samples/example.txt | 90 bytes
+
+=== HIGH-SPEED DOCUMENT SEARCH ===
+1 Add file   2 Search     3 Update ID   4 Delete ID
+5 List       6 Statistics 7 Save        8 Query history
+0 Exit
+Choice:
+File path:
+Add failed: check that the file exists, is readable, is <=8 MiB, and has a supported extension.
+
+=== HIGH-SPEED DOCUMENT SEARCH ===
+1 Add file   2 Search     3 Update ID   4 Delete ID
+5 List       6 Statistics 7 Save        8 Query history
+0 Exit
+Choice:
+Active documents: 4, keywords: 15, searches: 2, avg CPU ms: 7.338, posting visits: 3
+
+=== HIGH-SPEED DOCUMENT SEARCH ===
+1 Add file   2 Search     3 Update ID   4 Delete ID
+5 List       6 Statistics 7 Save        8 Query history
+0 Exit
+Choice:

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<testsuites tests="17" failures="0" disabled="2" errors="0" time="0.042" timestamp="2026-10-25T04:34:22.541" name="AllTests">
+  <testsuite name="SearchTest" tests="15" failures="0" disabled="0" skipped="0" errors="0" time="0.041" timestamp="2026-10-25T04:34:22.541">
+    <testcase name="InitializeIndex" file="test/test_search_gtest.cpp" line="84" status="run" result="completed" time="0.003" timestamp="2026-10-25T04:34:22.541" classname="SearchTest" />
+    <testcase name="SupportedFile" file="test/test_search_gtest.cpp" line="89" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.545" classname="SearchTest" />
+    <testcase name="UnsupportedFile" file="test/test_search_gtest.cpp" line="95" status="run" result="completed" time="0.003" timestamp="2026-10-25T04:34:22.547" classname="SearchTest" />
+    <testcase name="AddDocument" file="test/test_search_gtest.cpp" line="100" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.551" classname="SearchTest" />
+    <testcase name="MissingDocument" file="test/test_search_gtest.cpp" line="110" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.553" classname="SearchTest" />
+    <testcase name="SearchKeyword" file="test/test_search_gtest.cpp" line="118" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.556" classname="SearchTest" />
+    <testcase name="UnknownKeyword" file="test/test_search_gtest.cpp" line="130" status="run" result="completed" time="0.003" timestamp="2026-10-25T04:34:22.558" classname="SearchTest" />
+    <testcase name="CaseInsensitiveSearch" file="test/test_search_gtest.cpp" line="142" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.562" classname="SearchTest" />
+    <testcase name="EmptyQuery" file="test/test_search_gtest.cpp" line="154" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.564" classname="SearchTest" />
+    <testcase name="MultipleDocuments" file="test/test_search_gtest.cpp" line="161" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.567" classname="SearchTest" />
+    <testcase name="RankedResults" file="test/test_search_gtest.cpp" line="177" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.570" classname="SearchTest" />
+    <testcase name="UpdateDocument" file="test/test_search_gtest.cpp" line="194" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.572" classname="SearchTest" />
+    <testcase name="DeleteDocument" file="test/test_search_gtest.cpp" line="210" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.575" classname="SearchTest" />
+    <testcase name="SaveAndReload" file="test/test_search_gtest.cpp" line="224" status="run" result="completed" time="0.003" timestamp="2026-10-25T04:34:22.578" classname="SearchTest" />
+    <testcase name="EmptyIndexStatistics" file="test/test_search_gtest.cpp" line="249" status="run" result="completed" time="0.002" timestamp="2026-10-25T04:34:22.581" classname="SearchTest" />
+  </testsuite>
+  <testsuite name="FailureDemo" tests="2" failures="0" disabled="2" skipped="0" errors="0" time="0." timestamp="1970-01-01T00:00:00.000">
+    <testcase name="DISABLED_WrongFileExtension" file="test/test_search_gtest.cpp" line="261" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T00:00:00.000" classname="FailureDemo" />
+    <testcase name="DISABLED_WrongDocumentCount" file="test/test_search_gtest.cpp" line="267" status="notrun" result="suppressed" time="0." timestamp="1970-01-01T00:00:00.000" classname="FailureDemo" />
+  </testsuite>
+</testsuites>
