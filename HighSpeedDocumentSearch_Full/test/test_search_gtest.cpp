@@ -252,6 +252,56 @@ TEST_F(SearchTest, EmptyIndexStatistics) {
     EXPECT_EQ(hs_active_documents(&index), 0u);
 }
 
+// ADDITIONAL GTEST COVERAGE: result printing and storage edge cases.
+TEST_F(SearchTest, PrintNoResults) {
+    FILE* out = tmpfile();
+    ASSERT_NE(out, nullptr);
+    hs_print_results(&index, nullptr, 0, out);
+    rewind(out);
+    char line[256] = {};
+    ASSERT_NE(fgets(line, sizeof(line), out), nullptr);
+    EXPECT_NE(std::string(line).find("No matching documents."), std::string::npos);
+    fclose(out);
+}
+
+TEST_F(SearchTest, PrintMatchingResults) {
+    auto path = createFile("print.txt", "cricket cricket");
+    ASSERT_GT(hs_add(&index, path.c_str()), 0);
+    auto results = search("cricket");
+    ASSERT_EQ(results.size(), 1u);
+    FILE* out = tmpfile();
+    ASSERT_NE(out, nullptr);
+    hs_print_results(&index, results.data(), results.size(), out);
+    rewind(out);
+    char line[2048] = {};
+    ASSERT_NE(fgets(line, sizeof(line), out), nullptr);
+    EXPECT_NE(std::string(line).find("print.txt"), std::string::npos);
+    fclose(out);
+}
+
+TEST_F(SearchTest, PrintResultsWithNullStream) {
+    hs_print_results(&index, nullptr, 0, nullptr);
+    SUCCEED();
+}
+
+TEST_F(SearchTest, InvalidPersistenceArguments) {
+    EXPECT_EQ(hs_save(nullptr, folder.c_str()), -1);
+    EXPECT_EQ(hs_save(&index, nullptr), -1);
+    EXPECT_EQ(hs_load(nullptr, folder.c_str()), -1);
+    EXPECT_EQ(hs_load(&index, nullptr), -1);
+}
+
+TEST_F(SearchTest, MissingDatabaseIsEmpty) {
+    EXPECT_EQ(hs_load(&index, folder.c_str()), 0);
+    EXPECT_EQ(hs_active_documents(&index), 0u);
+}
+
+TEST_F(SearchTest, RejectInvalidDatabaseHeader) {
+    auto path = createFile("documents.dat", "BAD_HEADER\n1\n");
+    (void)path;
+    EXPECT_EQ(hs_load(&index, folder.c_str()), -1);
+}
+
 // =====================================================
 // INTENTIONAL FAILURE DEMONSTRATIONS
 // Disabled during normal execution.

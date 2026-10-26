@@ -3,3 +3,19 @@ build/
 *.gcno
 *.gcov
 *.exe
+# Build outputs
+build/
+*.o
+*.exe
+
+# Coverage files
+*.gcov
+*.gcda
+*.gcno
+
+# Generated test reports
+gtest_results.xml
+
+# Temporary and backup files
+*.backup
+*.zip
