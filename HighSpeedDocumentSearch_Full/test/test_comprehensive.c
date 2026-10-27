@@ -14,9 +14,27 @@ static void path(char *out, size_t n, const char *name) {
     int k = snprintf(out, n, "%s/%s", root, name);
     assert(k > 0 && (size_t)k < n);
 }
-static void write_text(const char *p, const char *s) {
-    FILE *f = fopen(p, "wb"); assert(f);
-    assert(fputs(s, f) >= 0); assert(fclose(f) == 0);
+static void write_text(const char *p, const char *s)
+{
+    FILE *f = fopen(p, "wb");
+
+    assert(f != NULL);
+
+    if (f == NULL) {
+        fprintf(stderr, "Error: Cannot open test file: %s\n", p);
+        exit(EXIT_FAILURE);
+    }
+
+    if (fputs(s, f) == EOF) {
+        fprintf(stderr, "Error: Cannot write test file: %s\n", p);
+        (void)fclose(f);
+        exit(EXIT_FAILURE);
+    }
+
+    if (fclose(f) != 0) {
+        fprintf(stderr, "Error: Cannot close test file: %s\n", p);
+        exit(EXIT_FAILURE);
+    }
 }
 static void query_count(SearchIndex *idx, const char *q, size_t want) {
     SearchResult *r = NULL;

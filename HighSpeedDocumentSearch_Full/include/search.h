@@ -8,9 +8,9 @@
 #define HS_BUCKETS 8191
 #define HS_MAX_FILE (8u*1024u*1024u)
 typedef struct { uint32_t id; char path[HS_PATH_MAX]; uint64_t size; uint32_t words; int active; } Document;
-typedef struct { uint32_t doc_id, frequency; } Posting;
-typedef struct Term { char *word; Posting *postings; size_t count, capacity; struct Term *next; } Term;
-typedef struct { Document *docs; size_t count, capacity; Term **buckets; size_t unique_terms; uint32_t next_id; uint64_t searches; double total_ms; uint64_t candidate_visits; } SearchIndex;
+typedef struct { uint32_t doc_id; uint32_t frequency; } Posting;
+typedef struct Term { char *word; Posting *postings; size_t count; size_t capacity; struct Term *next; } Term;
+typedef struct { Document *docs; size_t count; size_t capacity; Term **buckets; size_t unique_terms; uint32_t next_id; uint64_t searches; double total_ms; uint64_t candidate_visits; } SearchIndex;
 typedef struct { uint32_t doc_id; double score; } SearchResult;
 int hs_init(SearchIndex *idx);
 void hs_destroy(SearchIndex *idx);
