@@ -1,0 +1,164 @@
+src/index.c:21:337: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-10.4]
+static int index_file(SearchIndex *idx,Document *d){struct stat st;if(stat(d->path,&st)!=0||!S_ISREG(st.st_mode)||st.st_size<0||(uint64_t)st.st_size>HS_MAX_FILE)return -1;FILE *f=fopen(d->path,"rb");if(!f)return -1;char word[HS_WORD_MAX];size_t n=0;int c,error=0;uint32_t words=0;while((c=fgetc(f))!=EOF){if(isalnum((unsigned char)c)||c=='_'){if(n<sizeof(word)-1)word[n++]=(char)tolower((unsigned char)c);}else if(n){word[n]=0;Term *t=find_term(idx,word,1);if(!t||add_posting(t,d->id)!=0||words==UINT32_MAX){error=1;break;}words++;n=0;}}if(!error&&n){word[n]=0;Term *t=find_term(idx,word,1);if(!t||add_posting(t,d->id)!=0||words==UINT32_MAX)error=1;else words++;}if(ferror(f))error=1;if(fclose(f)!=0)error=1;if(error){remove_postings(idx,d->id);return -1;}d->size=(uint64_t)st.st_size;d->words=words;return 0;}
+                                                                                                                                                                                                                                                                                                                                                ^
+src/index.c:22:123: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-10.4]
+int hs_add(SearchIndex *idx,const char *path){if(!idx||!idx->buckets||!path)return -1;size_t len=strlen(path);if(!len||len>=HS_PATH_MAX||!hs_supported_file(path)||idx->next_id==UINT32_MAX||idx->next_id>INT_MAX)return -1;for(size_t i=0U;i<idx->count;i++)if(idx->docs[i].active&&strcmp(idx->docs[i].path,path)==0)return -2;if(idx->count==idx->capacity){size_t cap=idx->capacity?idx->capacity*2U:16U;if(cap<idx->capacity||cap>SIZE_MAX/sizeof(Document))return -1;Document *p=realloc(idx->docs,cap*sizeof(*p));if(!p)return -1;idx->docs=p;idx->capacity=cap;}Document *d=&idx->docs[idx->count];memset(d,0,sizeof(*d));d->id=idx->next_id;memcpy(d->path,path,len+1);d->active=1;if(index_file(idx,d)!=0)return -1;idx->next_id++;idx->count++;return (int)d->id;}
+                                                                                                                          ^
+src/index.c:26:307: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-10.4]
+size_t hs_search(SearchIndex *idx,const char *query,SearchResult **out){if(out)*out=NULL;if(!idx||!idx->buckets||!query||!out)return 0;clock_t start=clock();char terms[32][HS_WORD_MAX],word[HS_WORD_MAX];size_t nt=0,n=0;for(const unsigned char *p=(const unsigned char *)query;;p++){int c=*p;if(isalnum(c)||c=='_'){if(n<HS_WORD_MAX-1)word[n++]=(char)tolower(c);}else if(n){word[n]=0;int seen=0;for(size_t j=0U;j<nt;j++)if(strcmp(terms[j],word)==0)seen=1;if(!seen&&nt<32)strcpy(terms[nt++],word);n=0;}if(!c)break;}
+                                                                                                                                                                                                                                                                                                                  ^
+src/index.c:27:76: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-10.4]
+size_t active=hs_active_documents(idx);SearchResult *r=calloc(active?active:1,sizeof(*r));if(!r)return 0;size_t nr=0;/* Only visit posting-list candidates; no full-document scoring scan. */for(size_t j=0U;j<nt;j++){Term *t=find_term(idx,terms[j],0);if(!t)continue;double idf=log(((double)active+1)/((double)t->count+1))+1;for(size_t k=0U;k<t->count;k++){Posting p=t->postings[k];const Document *d=hs_document(idx,p.doc_id);if(!d)continue;idx->candidate_visits++;double score=((double)p.frequency/(d->words?d->words:1))*idf;size_t z=0;while(z<nr&&r[z].doc_id!=p.doc_id)z++;if(z==nr){r[nr++]=(SearchResult){p.doc_id,score};}else r[z].score+=score;}}qsort(r,nr,sizeof(*r),compare_results);*out=r;idx->searches++;idx->total_ms+=1000.0*(double)(clock()-start)/(double)CLOCKS_PER_SEC;return nr;}
+                                                                           ^
+src/index.c:28:233: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-10.4]
+void hs_print_results(const SearchIndex *idx,const SearchResult *r,size_t n,FILE *out){if(!out)return;for(size_t i=0U;i<n;i++){const Document *d=hs_document(idx,r[i].doc_id);if(d)fprintf(out,"%zu. [ID %u] %.5f | %s | %llu bytes\n",i+1,d->id,r[i].score,d->path,(unsigned long long)d->size);}if(!n)fprintf(out,"No matching documents.\n");}
+                                                                                                                                                                                                                                        ^
+src/index.c:11:70: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-11.5]
+static char *copy_string(const char *s){size_t n=strlen(s)+1U;char *p=malloc(n);if(p)memcpy(p,s,n);return p;}
+                                                                     ^
+src/index.c:12:199: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-11.5]
+static Term *find_term(SearchIndex *idx,const char *word,int create){size_t b=hash_word(word);Term *t=idx->buckets[b];while(t){if(strcmp(t->word,word)==0)return t;t=t->next;}if(!create)return NULL;t=calloc(1,sizeof(*t));if(!t)return NULL;t->word=copy_string(word);if(!t->word){free(t);return NULL;}t->next=idx->buckets[b];idx->buckets[b]=t;idx->unique_terms++;return t;}
+                                                                                                                                                                                                      ^
+src/index.c:13:329: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-11.5]
+static int add_posting(Term *t,uint32_t id){for(size_t i=0U;i<t->count;i++)if(t->postings[i].doc_id==id){if(t->postings[i].frequency==UINT32_MAX)return -1;t->postings[i].frequency++;return 0;}if(t->count==t->capacity){size_t cap=t->capacity?t->capacity*2U:4U;if(cap<t->capacity||cap>SIZE_MAX/sizeof(Posting))return -1;Posting *p=realloc(t->postings,cap*sizeof(*p));if(!p)return -1;t->postings=p;t->capacity=cap;}t->postings[t->count++]=(Posting){id,1};return 0;}
+                                                                                                                                                                                                                                                                                                                                        ^
+src/index.c:25:78: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-11.5]
+static int compare_results(const void *a,const void *b){const SearchResult *x=a,*y=b;if(x->score>y->score)return -1;if(x->score<y->score)return 1;return (x->doc_id>y->doc_id)-(x->doc_id<y->doc_id);}
+                                                                             ^
+src/index.c:16:169: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-12.1]
+int hs_init(SearchIndex *idx){if(idx==NULL){return -1;}memset(idx,0,sizeof(*idx));idx->buckets=calloc(HS_BUCKETS,sizeof(Term*));idx->next_id=1;return idx->buckets!=NULL?0:-1;}
+                                                                                                                                                                        ^
+src/index.c:18:140: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-12.1]
+const Document *hs_document(const SearchIndex *idx,uint32_t id){if(!idx)return NULL;for(size_t i=0U;i<idx->count;i++)if(idx->docs[i].id==id&&idx->docs[i].active!=0)return &idx->docs[i];return NULL;}
+                                                                                                                                           ^
+src/index.c:23:233: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-12.1]
+int hs_update(SearchIndex *idx,uint32_t id){if(!idx||!idx->buckets)return -1;Document *d=mutable_document(idx,id);if(!d)return -1;/* Stage file readability before replacing existing postings. */struct stat st;if(stat(d->path,&st)!=0||!S_ISREG(st.st_mode)||st.st_size<0||(uint64_t)st.st_size>HS_MAX_FILE)return -1;FILE *f=fopen(d->path,"rb");if(!f)return -1;fclose(f);remove_postings(idx,id);return index_file(idx,d);}
+                                                                                                                                                                                                                                        ^
+src/index.c:15:338: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-12.3]
+int hs_supported_file(const char *path){if(!path)return 0;const char *dot=strrchr(path,'.');if(!dot)return 0;const char *exts[]={".txt",".md",".c",".h",".cpp",".hpp",".cc",".py",".java",".js",".ts",".json",".xml",".html",".css",".csv",".log",".sql",".sh",".go",".rs"};for(size_t i=0U;i<sizeof(exts)/sizeof(exts[0]);i++){const char *a=dot,*b=exts[i];while(*a&&*b&&tolower((unsigned char)*a)==*b){a++;b++;}if(!*a&&!*b)return 1;}return 0;}
+                                                                                                                                                                                                                                                                                                                                                 ^
+src/index.c:10:68: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-14.4]
+static size_t hash_word(const char *s){uint32_t h=2166136261u;while(*s){h^=(unsigned char)*s++;h*=16777619u;}uint32_t bucket=h%(uint32_t)HS_BUCKETS;return (size_t)bucket;}
+                                                                   ^
+src/index.c:14:133: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-14.4]
+static void remove_postings(SearchIndex *idx,uint32_t id){for(size_t b=0U;b<(size_t)HS_BUCKETS;b++){Term **pp=&idx->buckets[b];while(*pp){Term *t=*pp;size_t w=0;for(size_t i=0U;i<t->count;i++)if(t->postings[i].doc_id!=id){t->postings[w]=t->postings[i];w++;};t->count=w;if(!w){*pp=t->next;free(t->postings);free(t->word);free(t);idx->unique_terms--;}else pp=&t->next;}}}
+                                                                                                                                    ^
+src/index.c:17:59: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-14.4]
+void hs_destroy(SearchIndex *idx){if(idx==NULL){return;}if(idx->buckets){for(size_t b=0U;b<(size_t)HS_BUCKETS;b++){Term *t=idx->buckets[b];while(t){Term *next=t->next;free(t->word);free(t->postings);free(t);t=next;}}free(idx->buckets);}free(idx->docs);memset(idx,0,sizeof(*idx));}
+                                                          ^
+src/index.c:19:78: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+static Document *mutable_document(SearchIndex *idx,uint32_t id){if(idx==NULL)return NULL;for(size_t i=0U;i<idx->count;i++){if((idx->docs[i].id==id)&&(idx->docs[i].active!=0)){return &idx->docs[i];}}return NULL;}
+                                                                             ^
+src/index.c:24:83: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+int hs_delete(SearchIndex *idx,uint32_t id){if((idx==NULL)||(idx->buckets==NULL)){return -1;}Document *d=mutable_document(idx,id);if(d==NULL){return -1;}remove_postings(idx,id);d->active=0;return 0;}
+                                                                                  ^
+src/index.c:20:63: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.6]
+size_t hs_active_documents(const SearchIndex *idx){size_t n=0;if(idx!=NULL)for(size_t i=0U;i<idx->count;i++)if(idx->docs[i].active!=0)n++;return n;}
+                                                              ^
+src/index.c:13:300: error: Variable 'Posting' is unknown [misra-config]
+static int add_posting(Term *t,uint32_t id){for(size_t i=0U;i<t->count;i++)if(t->postings[i].doc_id==id){if(t->postings[i].frequency==UINT32_MAX)return -1;t->postings[i].frequency++;return 0;}if(t->count==t->capacity){size_t cap=t->capacity?t->capacity*2U:4U;if(cap<t->capacity||cap>SIZE_MAX/sizeof(Posting))return -1;Posting *p=realloc(t->postings,cap*sizeof(*p));if(!p)return -1;t->postings=p;t->capacity=cap;}t->postings[t->count++]=(Posting){id,1};return 0;}
+                                                                                                                                                                                                                                                                                                           ^
+src/index.c:22:440: error: Variable 'Document' is unknown [misra-config]
+int hs_add(SearchIndex *idx,const char *path){if(!idx||!idx->buckets||!path)return -1;size_t len=strlen(path);if(!len||len>=HS_PATH_MAX||!hs_supported_file(path)||idx->next_id==UINT32_MAX||idx->next_id>INT_MAX)return -1;for(size_t i=0U;i<idx->count;i++)if(idx->docs[i].active&&strcmp(idx->docs[i].path,path)==0)return -2;if(idx->count==idx->capacity){size_t cap=idx->capacity?idx->capacity*2U:16U;if(cap<idx->capacity||cap>SIZE_MAX/sizeof(Document))return -1;Document *p=realloc(idx->docs,cap*sizeof(*p));if(!p)return -1;idx->docs=p;idx->capacity=cap;}Document *d=&idx->docs[idx->count];memset(d,0,sizeof(*d));d->id=idx->next_id;memcpy(d->path,path,len+1);d->active=1;if(index_file(idx,d)!=0)return -1;idx->next_id++;idx->count++;return (int)d->id;}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                       ^
+include/search.h:5:0: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-21.6]
+#include <stdio.h>
+^
+src/index.c:7:0: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-21.10]
+#include <time.h>
+^
+src/storage.c:12:147: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-10.3]
+if(rename(tmp,path)!=0){remove(tmp);return -1;}if(join(path,sizeof(path),dir,"statistics.dat"))return -1;f=fopen(path,"wb");if(!f)return -1;int ok=fprintf(f,"%llu %.9f %llu\n",(unsigned long long)idx->searches,idx->total_ms,(unsigned long long)idx->candidate_visits)>0;if(fclose(f)!=0)ok=0;return ok?0:-1;
+                                                                                                                                                  ^
+src/storage.c:24:1162: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-10.3]
+int hs_load(SearchIndex *idx,const char *dir){if(!idx||!dir)return -1;char path[HS_PATH_MAX+64];if(join(path,sizeof(path),dir,"documents.dat"))return -1;FILE *f=fopen(path,"rb");if(!f)return errno==ENOENT?0:-1;char line[HS_PATH_MAX+64];if(!fgets(line,sizeof(line),f)||(strcmp(line,"HSDS2\n")!=0&&strcmp(line,"HSDS1\n")!=0)){fclose(f);return -1;}if(!fgets(line,sizeof(line),f)){fclose(f);return -1;}char *end=NULL;unsigned long next=strtoul(line,&end,10);if(end==line||next==0||next>UINT32_MAX){fclose(f);return -1;}while(fgets(line,sizeof(line),f)){char *tab=strchr(line,'\t');if(!tab){fclose(f);return -1;}*tab=0;unsigned long id=strtoul(line,&end,10);if(end==line||*end||id==0||id>UINT32_MAX||id<idx->next_id){fclose(f);return -1;}char *p=tab+1;p[strcspn(p,"\r\n")]=0;if(!*p){fclose(f);return -1;}idx->next_id=(uint32_t)id;if(hs_add(idx,p)<0){fprintf(stderr,"Warning: skipping unavailable file: %s\n",p);idx->next_id=(uint32_t)id+1;}}if(ferror(f)){fclose(f);return -1;}fclose(f);if(next>idx->next_id)idx->next_id=(uint32_t)next;if(join(path,sizeof(path),dir,"statistics.dat"))return -1;f=fopen(path,"rb");if(f){unsigned long long searches=0,visits=0;double ms=0;int n=fscanf(f,"%llu %lf %llu",&searches,&ms,&visits);if(n>=2){idx->searches=searches;idx->total_ms=ms;if(n==3)idx->candidate_visits=visits;}fclose(f);}return 0;}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         ^
+src/storage.c:6:123: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-12.1]
+static int join(char *dst,size_t cap,const char *dir,const char *name){int n=snprintf(dst,cap,"%s/%s",dir,name);return n>0&&(size_t)n<cap?0:-1;}
+                                                                                                                          ^
+src/storage.c:7:102: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-12.3]
+int hs_save(const SearchIndex *idx,const char *dir){if(!idx||!dir)return -1;char path[HS_PATH_MAX+64],tmp[HS_PATH_MAX+64];if(join(path,sizeof(path),dir,"documents.dat")||join(tmp,sizeof(tmp),dir,"documents.tmp"))return -1;FILE *f=fopen(tmp,"wb");if(!f)return -1;if(fprintf(f,"HSDS2\n%u\n",idx->next_id)<0)goto fail;for(size_t i=0;i<idx->count;i++){const Document *d=&idx->docs[i];if(d->active&&fprintf(f,"%u\t%s\n",d->id,d->path)<0)goto fail;}if(fclose(f)!=0){remove(tmp);return -1;}
+                                                                                                     ^
+src/storage.c:3:0: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-21.6]
+#include <stdio.h>
+^
+src/storage.c:10:19: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-12.1]
+if(remove(path)!=0&&errno!=ENOENT){remove(tmp);return -1;}
+                  ^
+src/storage.c:10:28: error: Variable 'ENOENT' is unknown [misra-config]
+if(remove(path)!=0&&errno!=ENOENT){remove(tmp);return -1;}
+                           ^
+src/main.c:93:21: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-10.4]
+        } while ((c != '\n') && (c != EOF));
+                    ^
+src/main.c:242:14: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.4]
+    for (;;) {
+             ^
+src/main.c:67:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return;
+        ^
+src/main.c:77:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return -1;
+        ^
+src/main.c:81:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return -1;
+        ^
+src/main.c:95:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return -1;
+        ^
+src/main.c:109:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return -1;
+        ^
+src/main.c:117:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return -1;
+        ^
+src/main.c:128:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return;
+        ^
+src/main.c:154:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return;
+        ^
+src/main.c:186:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return;
+        ^
+src/main.c:193:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return;
+        ^
+src/main.c:220:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return 1;
+        ^
+src/main.c:228:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return 1;
+        ^
+src/main.c:235:9: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-15.5]
+        return 1;
+        ^
+src/main.c:32:5: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-17.1]
+    va_list args;
+    ^
+src/main.c:35:13: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-17.1]
+    va_start(args, format);
+            ^
+src/main.c:37:11: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-17.1]
+    va_end(args);
+          ^
+src/main.c:217:10: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-17.3]
+    if ((MKDIR(dir) != 0) && (errno != EEXIST)) {
+         ^
+src/main.c:217:40: error: Variable 'EEXIST' is unknown [misra-config]
+    if ((MKDIR(dir) != 0) && (errno != EEXIST)) {
+                                       ^
+src/main.c:305:17: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-21.3]
+            free(results);
+                ^
+src/main.c:8:0: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-21.6]
+#include <stdio.h>
+^
+src/main.c:11:0: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-21.10]
+#include <time.h>
+^
+src/main.c:254:29: style: misra violation (use --rule-texts=<file> to get proper output) [misra-c2012-22.8]
+        long choice = strtol(line, &end, 10);
+                            ^
+nofile:0:0: information: Active checkers: There was critical errors (use --checkers-report=<filename> to see details) [checkersReport]
+
